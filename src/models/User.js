@@ -15,6 +15,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
+  password: {
+    type: String,
+    required: true,
+  },
   // Add any additional fields you may need
   createdAt: {
     type: Date,

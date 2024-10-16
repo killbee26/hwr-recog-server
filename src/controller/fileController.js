@@ -20,6 +20,7 @@ exports.uploadFile = upload.single('file');
 exports.processFile = async (req, res) => {
   const { file } = req;
   const { userID } = req.body;
+  const { description } = req.body;
 
   try {
     // Find the user by userID
@@ -41,18 +42,19 @@ exports.processFile = async (req, res) => {
       s3Key: s3Data.Key,
       s3Url: s3Data.Location,
       uploadedByID: user._id,
+      description: description,
     });
     await newFile.save();
 
     // Call the Google Vision Lambda function to extract text
-    const visionResult = await invokeGoogleVision(s3Data.Location);
+    const visionResult = await invokeGoogleVision(s3Data.Key);
 
     // Update the file record with extracted text
     newFile.textExtracted = visionResult.text;
     await newFile.save();
 
     // Return the extracted text to the client
-    res.status(200).json({ text: visionResult.text });
+    res.status(200).json({ extractedText: visionResult.text });
   } catch (error) {
     res.status(500).json({ error: 'File processing failed', details: error.message });
   }

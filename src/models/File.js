@@ -28,6 +28,10 @@ const fileSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
+  description: {
+    type: String,
+    required: true,
+  }
 });
 
 // Create a model from the schema
