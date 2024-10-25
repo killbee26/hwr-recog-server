@@ -64,3 +64,46 @@ exports.loginUser = async (req, res) => {
     return res.status(500).json({ error: 'Login failed', details: error.message });
   }
 };
+
+exports.verifyToken = (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+
+  if(!token) return res.status(401).json({error: 'No token provided'});
+
+
+  try{
+      const decoded = jwt.verify(token, JWT_SECRET);
+      res.status(200).json({ valid: true, user: decoded});
+  }catch(err){
+
+      if(err.name === 'TokenExpiredError'){
+          return res.status(401).json({ valid: false, error: "Token has expired"});
+      }
+      res.status(401).json({ valid: false, error: 'Invalid Token!'})
+  }
+}
+
+// Assuming you're using Express.js for your backend // Adjust this import according to your file structure
+
+exports.getAvatarUrl = async (req, res) => {
+  try {
+    const userID = req.userID; // Assuming userID is set in the request object, possibly through middleware
+    console.log(userID);
+    // Fetch the user from the database
+    const user = await User.findById(userID);
+
+    // Check if the user exists
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Extract the avatar URL from the user object
+    const avatarUrl = user.image || "/default-avatar.png"; // Fallback to a default image if not set
+
+    // Send the avatar URL back in the response
+    return res.status(200).json({ avatarUrl });
+  } catch (error) {
+    console.error("Error fetching user avatar:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
